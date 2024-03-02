@@ -76,6 +76,7 @@ class HealthDataCollector {
         healthStore.execute(query)
     }
 }
+}
 
 // Example usage
 let healthDataCollector = HealthDataCollector()

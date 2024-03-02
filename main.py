@@ -1,3 +1,8 @@
+
+import os
+import sys
+print(sys.path)
+print(os.environ["PYTHONPATH"])
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import spotipy
