@@ -44,6 +44,7 @@ def open_customize_window(mode_name):
     save_button = tk.Button(customize_window, text="Save", command=lambda: save_mode(mode_name, playlist_var.get(), playlist_ids[playlists.index(playlist_var.get())]))
     save_button.pack()
 
+
 # Function to save a mode and update the list
 def save_mode(mode_name, playlist_name, playlist_id):
     modes.append({'name': mode_name, 'playlist': playlist_name, 'playlist_id': playlist_id})
