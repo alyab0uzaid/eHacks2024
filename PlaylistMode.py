@@ -9,7 +9,7 @@ from tkinter import simpledialog, Toplevel
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="069f73ab59bd4d859710fcc0c2be86a2",
                                                client_secret="9280fe9224384285ad44c1f3c85e460f",
                                                redirect_uri="http://127.0.0.1:5000/redirect",
-                                               scope="streaming, playlist-read-private,  user-modify-playback-state"))
+                                               scope="streaming"))
 
 # Global list to keep track of modes
 modes = []
@@ -43,7 +43,6 @@ def open_customize_window(mode_name):
 
     save_button = tk.Button(customize_window, text="Save", command=lambda: save_mode(mode_name, playlist_var.get(), playlist_ids[playlists.index(playlist_var.get())]))
     save_button.pack()
-
 
 # Function to save a mode and update the list
 def save_mode(mode_name, playlist_name, playlist_id):
