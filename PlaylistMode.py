@@ -14,12 +14,17 @@ def test_spotify_api():
     # Print the display name of the user
     print(f"Successfully authenticated as: {user_info['display_name']}")
 
+#implement code to decide on what music to play based on heart rate and location 
+    
 def play_study_playlist():
     # Logic to play study playlist
     pass
 
 def play_gym_playlist():
     # Logic to play gym playlist
+    pass
+def play_school_playlist():
+    #logic to play school playlist 
     pass
 
 # Test the Spotify API connection
@@ -29,10 +34,15 @@ test_spotify_api()
 window = tk.Tk()
 window.title("Mode Player")
 
-study_button = tk.Button(window, text="Study Mode", command=play_study_playlist)
+study_button = tk.Button(window, text="Study Mode", 
+command=play_study_playlist)
 study_button.pack()
 
 gym_button = tk.Button(window, text="Gym Mode", command=play_gym_playlist)
 gym_button.pack()
+
+school_button = tk.Button(window, text="School Mode", 
+command=play_school_playlist)
+school_button.pack()
 
 window.mainloop()
