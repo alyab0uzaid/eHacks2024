@@ -52,7 +52,39 @@ override func viewDidAppear(_ animated: Bool) {
         // Location services are not enabled
     }
 }
+func sendLocationToServer(latitude: Double, longitude: Double) {
+        // Create a URL with your FastAPI server endpoint
+        guard let url = URL(string: "http://0.0.0.0:5000/receive_location") else { # url must be changed here to uvicorn link
+            print("Invalid URL")
+            return
+        }
 
+        // Create a JSON payload with latitude and longitude
+        let locationData: [String: Any] = ["lat": latitude, "long": longitude]
+
+        // Convert JSON to Data
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: locationData) else {
+            print("Failed to serialize JSON data")
+            return
+        }
+
+        // Create a POST request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        // Send the request
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error)")
+            } else if let data = data {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response: \(responseString)")
+                }
+            }
+        }.resume()
+    }
 // Implement the CLLocationManagerDelegate methods to handle location updates:
 func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     if let location = locations.last {
