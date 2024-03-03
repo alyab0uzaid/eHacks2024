@@ -1,83 +1,105 @@
-import HealthKit
+//In the Swift file where you want to access location data, import Core Location:
+import CoreLocation
 
-class HealthDataCollector {
-    
-    let healthStore = HKHealthStore()
+// Create a CLLocationManager instance and set its delegate to receive location updates. 
+//We typically do this in a view controller:
 
-     // requestAuthorization function requests permission to read heart rate and step count data.
-    func requestAuthorization() {
-        if HKHealthStore.isHealthDataAvailable() {
-            let readTypes: Set<HKObjectType> = [
-                HKObjectType.quantityType(forIdentifier: .heartRate)!,
-                HKObjectType.quantityType(forIdentifier: .stepCount)!,
-                // Add more types as we need
-            ]
 
-            healthStore.requestAuthorization(toShare: nil, read: readTypes) { (success, error) in
-                if success {
-                    self.collectHealthData()
-                } else {
-                    print("Authorization failed with error: \(String(describing: error))")
-                }
-            }
-        }
-    }
+class ViewController: UIViewController, CLLocationManagerDelegate {
+    let locationManager = CLLocationManager()
 
-    //the saveDataToFile function takes a string data and saves it to 
-    //a text file named "health_data.txt" in the app's document directory.
-    func saveDataToFile(data: String) {
-        let fileName = "health_data.txt"
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
-        if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = documentDirectory.appendingPathComponent(fileName)
-
-            do {
-                try data.write(to: fileURL, atomically: true, encoding: .utf8)
-                print("Data saved to file: \(fileURL.path)")
-            } catch {
-                print("Error saving data to file: \(error)")
-            }
-        }
-
-    //  collectHealthData function initiates the collection process, 
-    // calling queryHealthData for each specified health metric.
-
-    func collectHealthData() {
-        // Query heart rate data
-        let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
-        queryHealthData(sampleType: heartRateType)
-
-        // Query step count data
-        let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount)!
-        queryHealthData(sampleType: stepCountType)
-
-        // Add more queries for other health metrics as we will need
-    }
-
-    func queryHealthData(sampleType: HKSampleType) {
-        let query = HKSampleQuery(
-            sampleType: sampleType,
-            predicate: nil,
-            limit: HKObjectQueryNoLimit,
-            sortDescriptors: nil
-        ) { (query, results, error) in
-            if let samples = results as? [HKQuantitySample] {
-                for sample in samples {
-                    let quantity = sample.quantity
-                    let unit = HKUnit.count()
-                    let value = quantity.doubleValue(for: unit)
-                    
-                    // Handle the collected data as needed
-                    print("Type: \(sampleType.identifier), Value: \(value)")
-                }
-            }
-        }
-
-        healthStore.execute(query)
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
     }
 }
 
-// Example usage
-let healthDataCollector = HealthDataCollector()
-healthDataCollector.requestAuthorization()
+//Request permission from the user to access their location:
 
+func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    guard let location = locations.last else { return }
+    
+    let speed = location.speed // Speed in meters per second
+
+    if speed >= 0 {
+        // Speed is a positive value indicating the device is moving
+        print("Current speed: \(speed) m/s")
+    } else {
+        
+        // Speed is an invalid value (-1) indicating it could not be determined
+        print("Speed could not be determined")
+    }
+}
+
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+
+    if CLLocationManager.locationServicesEnabled() {
+        switch CLLocationManager.authorizationStatus() {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization() // or requestAlwaysAuthorization()
+        case .restricted, .denied:
+            // Handle restriction or denial
+        case .authorizedWhenInUse, .authorizedAlways:
+            // Permission granted
+            locationManager.startUpdatingLocation()
+        @unknown default:
+            fatalError()
+        }
+    } else {
+        // Location services are not enabled
+    }
+}
+func sendLocationToServer(latitude: Double, longitude: Double) {
+        // Create a URL with your FastAPI server endpoint
+        guard let url = URL(string: "http://0.0.0.0:5000/receive_location") else { # url must be changed here to uvicorn link
+            print("Invalid URL")
+            return
+        }
+
+        // Create a JSON payload with latitude and longitude
+        let locationData: [String: Any] = ["lat": latitude, "long": longitude]
+
+        // Convert JSON to Data
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: locationData) else {
+            print("Failed to serialize JSON data")
+            return
+        }
+
+        // Create a POST request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+
+        // Send the request
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error)")
+            } else if let data = data {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response: \(responseString)")
+                }
+            }
+        }.resume()
+    }
+// Implement the CLLocationManagerDelegate methods to handle location updates:
+func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    if let location = locations.last {
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        // Use latitude and longitude
+    }
+}
+
+func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    // Handle failure to get location
+}
+
+//To conserve battery, start and stop location updates as needed:
+locationManager.startUpdatingLocation()
+
+//When you no longer need to receive location updates, call:
+locationManager.startUpdatingLocation() 
