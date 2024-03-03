@@ -102,4 +102,4 @@ func locationManager(_ manager: CLLocationManager, didFailWithError error: Error
 locationManager.startUpdatingLocation()
 
 //When you no longer need to receive location updates, call:
-locationManager.startUpdatingLocation()
+locationManager.startUpdatingLocation() 

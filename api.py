@@ -1,16 +1,24 @@
 from fastapi import FastAPI , requests
 from pydantic import BaseModel
+import GoogleAPI
 app = FastAPI()
 
 class LocationData(BaseModel):
     lat: float
     long: float
 
-@app.post("/recieve_location") #receives binformatioon via post
-async def recieve_location(location_data: LocationData): #def to get data in async
+@app.post("/receive_location/{lat}/{long}") #receives binformatioon via post
+async def receive_location(lat, long): #def to get data in async
     print("Received DATA , ""LOCATION_DATA.dict()")
+    print(lat, "  ", long)
+    Location = GoogleAPI.get_nearby_places(lat, long, 15)
+
                              #dict used to process data
-    return {"message":"Location data recieved succesfully"}
+    return {
+        "message":"Location data recieved succesfully",
+        "playlistID": "an ID",
+        "Location:" : Location,
+    }
 
 @app.get("/")
 async def root():
@@ -19,7 +27,7 @@ async def root():
 print("Running")
 
 if __name__ == "__main__" : 
-    import uvicorn
+    import uvicorn  
     uvicorn.run(app,host="",port = 5000)
 
 
