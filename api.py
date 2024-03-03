@@ -1,24 +1,34 @@
 from fastapi import FastAPI , requests
 from pydantic import BaseModel
-import GoogleAPI
+import GoogleAPI 
+from main import App
+
 app = FastAPI()
 
-class LocationData(BaseModel):
-    lat: float
-    long: float
 
-@app.post("/receive_location/{lat}/{long}") #receives binformatioon via post
-async def receive_location(lat, long): #def to get data in async
+@app.post("/receive_location/{lat}/{long}/{mode}") #receives binformatioon via post
+async def receive_location(lat, long, mode): #def to get data in async
     print("Received DATA , ""LOCATION_DATA.dict()")
-    print(lat, "  ", long)
-    Location = GoogleAPI.get_nearby_places(lat, long, 15)
-
+    print(lat, "  ", long, " ", mode)
+    Location = GoogleAPI.get_nearby_places_with_distance(lat, long, 15)
+   
                              #dict used to process data
-    return {
-        "message":"Location data recieved succesfully",
-        "playlistID": "an ID",
-        "Location:" : Location,
+    if mode == "Gym" and  GoogleAPI.places_info_list and GoogleAPI.places_info_list[0]['name'] == "Student Fitness Center":
+        return{
+            "Spotify URL" : "Here goes spotify URL",
+            "Location:" : Location[0],
+        }
+    elif mode == "Chill":  
+        return {
+         "Spotpify URL" : "Here goes spotify URL",
+        "Location:" : Location[0],
     }
+    elif mode == "Library" and  GoogleAPI.places_info_list and GoogleAPI.places_info_list[0]['name'] == "Student Fitness Center":
+        return {
+        "Spotify URL" : "Here goes spotify URL",
+        "Location:" : Location[0],
+    }
+    
 
 @app.get("/")
 async def root():
@@ -29,7 +39,3 @@ print("Running")
 if __name__ == "__main__" : 
     import uvicorn  
     uvicorn.run(app,host="",port = 5000)
-
-
-
-    # Return python dictionary with JSON.
