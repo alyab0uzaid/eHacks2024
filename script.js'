@@ -1,0 +1,45 @@
+// Fetch playlists from FastAPI backend and populate the dropdown
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('http://127.0.0.1:8000/playlists')
+    .then(response => response.json())
+    .then(data => {
+        const dropdown = document.getElementById('playlistsDropdown');
+        data.playlists.forEach(playlist => {
+            const option = document.createElement('option');
+            option.value = playlist;
+            option.text = playlist;
+            dropdown.appendChild(option);
+        });
+    })
+    .catch(error => console.error('Error fetching playlists:', error));
+});
+
+// Function to create a mode
+function createMode() {
+    const modeName = document.getElementById('modeName').value;
+    const playlistName = document.getElementById('playlistsDropdown').value;
+    // Example: Here you would send a request to your FastAPI backend to create a mode
+    // This part is commented out because it requires your backend endpoint to be implemented
+    /*
+    fetch('http://127.0.0.1:8000/modes/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: modeName,
+            playlist_name: playlistName,
+            // You will need to modify the backend to accept and process playlist_name or playlist_id
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        // Handle success response
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        // Handle errors
+    });
+    */
+}

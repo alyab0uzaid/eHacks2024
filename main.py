@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from typing import Optional
 
 app = FastAPI()
 
@@ -11,9 +12,6 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="069f73ab59bd4d859710fc
                                                redirect_uri="http://127.0.0.1:5000/redirect",
                                                scope="streaming"))
 
-# Global list to keep track of modes
-modes = []
-
 # Fetch user playlists
 @app.get("/playlists")
 async def fetch_user_playlists():
@@ -22,22 +20,6 @@ async def fetch_user_playlists():
     playlist_ids = [playlist['id'] for playlist in playlists['items']]
     return {"playlist_names": playlist_names, "playlist_ids": playlist_ids}
 
-# Create a new mode
-class Mode(BaseModel):
-    name: str
-    playlist_name: str
-    playlist_id: str
-
-@app.post("/modes/")
-async def create_mode(mode: Mode):
-    mode_dict = mode.dict()
-    modes.append(mode_dict)
-    return mode_dict
-
-# Get all modes
-@app.get("/modes/")
-async def get_modes():
-    return modes
 
 # Play a playlist
 @app.get("/play/{playlist_id}")
